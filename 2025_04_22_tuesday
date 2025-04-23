@@ -1,0 +1,130 @@
+## GPT를 통해 기초적인 SQL 문제 생성 후 문제 풀이 진행 (16 문제 진행)
+
+## 문제 0
+## 학생 정보를 저장할 테이블을 만들어 보자!
+## (students라는 테이블을 만들고, 아래 컬럼들을 포함시켜야 해.)
+CREATE TABLE students(
+id      INT            PRIMARY KEY,
+name    VARCHAR(16),
+age     INT,
+grade   VARCHAR(16)
+);
+# -> 피드백 : 컬럼 사이에 콤마(,)가 빠졌음
+# -> 피드백 : PRIMARY KEY는 고유 번호로써 무조건 사용해야함
+
+## 문제 1
+## INSERT 문 작성하기
+INSERT INTO students (id, name, age, grade)
+VALUES (1, 'Mina', 18, 'A');
+INSERT INTO students (id, name, age, grade)
+VALUES (2, 'Jisoo', 19, 'B')
+;
+# -> 피드백 : INSERT INTO 다음은 무조건 테이블명을 먼저 작성
+
+## 문제 2, 3
+## students 테이블에서 모든 학생의 전체 정보를 조회하려고 한다.
+## WHERE문을 사용하여 조건을 넣어서 성립
+SELECT name, age
+FROM students
+WHERE grade = 'A';
+
+## 문제 4, 5
+## students 테이블에서 모든 학생의 이름(name)과 나이(age) 를 나이가 많은 순서(내림차순) 로 정렬해서 조회
+SELECT name, age
+FROM students
+WHERE grade = 'A'
+ORDER BY age ASC
+;
+SELECT name, age
+FROM students
+WHERE grade = 'B'
+ORDER BY age ASC
+;
+
+
+## 문제 6 
+## 전체 학생 수의 행의 개수를 출력
+SELECT count(*)
+FROM students
+;
+# -> 피드백 : COUNT() 함수를 사용해서 구하면 간편
+
+## 문제 7 
+## 테이블에서 성적 별로 몇 명씩 있는지 조
+SELECT count(grade)
+FROM students
+GROUP BY grade;
+
+SELECT age, count(age)
+FROM students
+GROUP BY age;
+
+## 문제 8, 9
+## 학생 나이의 평균을 구하라
+SELECT grade, AVG(age)
+FROM students
+GROUP BY grade;
+
+## 문제 10
+## 테이블에서 이름이 'J'로 시작하는 학생의 이름과 나이를 출력하시오
+SELECT name, age
+FROM students
+WHERE name Like 'J%' ;
+# -> 피드백 : Like 함수를 사용하여 패턴이 일치하는지 확인
+
+
+## 문제 11 
+## 성적(grade) 에 따라 다음과 같은 메시지를 출력
+SELECT grade
+CASE 
+    WHEN grade = 'A' THEN 'Excellent'
+    WHEN grade = 'B' THEN 'Good'
+    ELSE 'Needs Improvenment'
+END
+FROM students
+;
+
+## 문제 12
+## 두 테이블을 학생 id 기준으로 연결해서 학생 이름(name) 과 수강 과목(class_name) 을 출력
+SELECT name, class_name
+FROM students
+ON students.id = classes.class_name ;
+
+## 문제 13
+## 모든 학생의 이름(name)과 수강 과목(class_name)을 출력하되, 수강 과목이 없는 학생도 결과에 포함되도록 
+SELECT name,class_name
+FROM students
+LEFT JOIN classes
+ON students.id = classes.student_id
+;
+
+## 문제 14
+## students와 classes 테이블을 이용해 학생별 수강 과목 수를 구하시오.
+SELECT name, 
+count(class_name) AS subject_count
+FROM students
+JOIN classes
+ON --
+GROUP BY name ;
+
+## 문제 15
+## students 테이블에서 학생들의 나이(age)가 전체 평균 나이보다 많은 학생의 이름(name)과 나이(age)를 출력
+SELECT name, age
+FROM students
+WHERE age > 
+(
+SELECT AVG(age)
+FROM students
+)
+;
+
+## 문제 16
+## students 테이블에서 가장 나이가 많은 학생의 이름(name), 나이(age) 를 출력하시오.
+## 단, 서브쿼리를 이용해서 최대 나이
+SELECT name,
+(
+SELECT MAX(age)
+FROM students
+) 
+FROM students
+;
