@@ -1,0 +1,134 @@
+SQL문제 GPT로 만들어서 (17번 ~ 23번)
+
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    name VARCHAR(30),
+    dept_id INT
+);
+CREATE TABLE departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+INSERT INTO employees (emp_id, name, dept_id) VALUES
+(1, 'Alice', 10),
+(2, 'Bob', 20),
+(3, 'Carol', 30),
+(4, 'Dave', NULL),
+(5, 'Erin', 20);
+
+INSERT INTO departments (dept_id, dept_name) VALUES
+(10, 'Sales'),
+(20, 'Engineering');
+
+
+SELECT * FROM employees;
+SELECT * FROM departments;
+
+-- 문제 17
+-- 존재하는 부서에 속한 직원의 이름을 출석하시오
+
+SELECT name
+FROM employees
+JOIN departments
+ON employees.dept_id = departments.dept_id
+;
+
+SELECT name
+FROM employees
+WHERE dept_id IN
+(
+    SELECT dept_id
+    FROM departments
+);
+
+-- 문제 18
+-- Engineering 부서에 소속된 직원들"**의 이름(name)을 출력하시오.
+-- 단, IN 서브쿼리를 사용해서 부서명을 기반으로 필터링할 것.
+SELECT name
+FROM employees
+WHERE dept_id IN
+(
+    SELECT dept_id
+    FROM departments
+    WHERE dept_id = 20
+);
+
+-- 문제 19
+-- departments 테이블에 존재하지 않는 부서에 속한 직원들의 이름(name)을 출력하시오.
+-- (즉, dept_id가 departments에 없는 경우만)
+-- NOT IN 사용 가능.
+SELECT name
+FROM employees
+WHERE dept_id NOT IN  
+(
+    SELECT dept_id
+    FROM departments
+)
+;
+
+-- 문제 20
+-- employees 테이블에서 수강 부서가 실제로 존재하는 직원들의 이름(name) 을 출력하시오.
+-- 단, EXISTS 서브쿼리를 사용할 것.
+SELECT name
+FROM employees
+WHERE EXISTS
+(
+    SELECT dept_id
+    FROM departments
+    WHERE employees.dept_id = departments.dept_id
+);
+-- 피드백 : EXISTS 의 경우 WHERE의 구문 안에 사용
+
+-- 문제 21
+-- employees 테이블에서
+-- Sales 부서에 속한 직원의 이름(name)을 출력하시오.
+-- 단, 반드시 EXISTS 서브쿼리를 사용하여 작성할 것.
+SELECT name
+FROM employees
+WHERE EXISTS
+(
+    SELECT dept_id
+    FROM departments
+    WHERE employees.dept_id = departments.dept_id
+    AND dept_name = 'Sales'
+);
+-- 피드백 : 문제의 조건을 보고 두개 이상이면 AND로 작성해야함
+
+-- 문제 22
+-- employees 테이블에서
+-- 부서별(dept_id) 직원 수를 계산한 후,
+-- 그 결과에서 직원 수가 2명 이상인 부서만 출력하시오.
+-- 단, 반드시 FROM 절 안에 서브쿼리(인라인 뷰) 를 사용해서 작성할 것
+SELECT dept_id
+FROM (
+    SELECT dept_id, count(*) AS A
+    FROM employees
+    GROUP BY dept_id
+) AS B
+WHERE A >=2 ;
+-- 피드백 : FROM 서브쿼리는 ()의 안에 값을 테이블 처럼 사용
+-- -> ex) 위에서 B 테이블안의 A(직원의 수 계산)
+-- 피드백 : 서브쿼리 해석 = dept_id의 전체 개수를 셀꺼야 근데 dept_id가 맞는거 끼리 그룹지어서
+
+-- 문제 23
+-- 모든 부서의 부서명(dept_name)과 해당 부서에 속한 직원 수(emp_count) 를 출력하시오.
+-- 단, 부서에 속한 직원이 1명도 없더라도 모든 부서를 포함해서 출력해야 하며,
+-- 직원 수 계산은 반드시 FROM 절의 서브쿼리(인라인 뷰)로 작성할 것.
+---- 1) 직원 수 세기 
+SELECT dept_id, count(*) AS emp_count
+FROM employees
+GROUP BY dept_id 
+
+----2) 그것을 부서 테이블과 합치기
+SELECT dept_name, COALESCE(E.emp_count, 0) emp_count
+FROM departments D
+LEFT JOIN 
+(
+    SELECT dept_id, count(*) AS emp_count
+    FROM employees
+    GROUP BY dept_id 
+) AS E
+ON D.dept_id = E.dept_id;
+-- 피드백 : COALESCE(칼럼, 바꾸고 싶은 값) 을 사용하면 테이블안의 NULL 값을 바꿈
+-- 피드백 : JOIN(INNER JOIN)의 경우는 양쪽 테이블에 모두 일치 하는 값이라 안됨
+-- 피드백 : RIGHT JOIN의 경우도 사용 가능 기준만 달라진다 생각
