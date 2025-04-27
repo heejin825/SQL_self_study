@@ -1,0 +1,155 @@
+-- GPT로 이용한 문제 해결 (24번 ~ 32번)
+CREATE TABLE products (
+    번 INT PRIMARY KEY,
+    제품명 VARCHAR(50),
+    카테고리번 INT,
+    가격 INT
+);
+
+CREATE TABLE categories (
+    카테고리번 INT PRIMARY KEY,
+    카테고리명 VARCHAR(50)
+);
+INSERT INTO products (번, 제품명, 카테고리번, 가격) VALUES
+(1, 'Laptop', 100, 1500),
+(2, 'Mouse', 100, 20),
+(3, 'Keyboard', 100, 50),
+(4, 'Sofa', 200, 800),
+(5, 'Table', 200, 600),
+(6, 'Pen', 300, 2);
+
+INSERT INTO categories (카테고리번, 카테고리명) VALUES
+(100, 'Electronics'),
+(200, 'Furniture'),
+(300, 'Stationery');
+
+select * from products;
+select * from categories; 
+
+-- 문제 24번
+SELECT 제품명, 가격
+FROM products
+WHERE 제품명 IN 
+(
+    SELECT 제품명
+    FROM products
+    WHERE 가격 >= 100
+ 
+)
+
+-- 문제 25번
+
+-- - 서브쿼리
+SELECT 카테고리번
+FROM categories
+WHERE 카테고리명 = 'Electronics';
+
+-- - 메인쿼리
+SELECT 제품명, 가격
+FROM products
+WHERE 카테고리번 IN (
+    
+SELECT 카테고리번
+FROM categories
+WHERE 카테고리명 = 'Electronics'
+
+)
+;
+
+-- 문제 26번
+
+SELECT 카테고리번, AVG(가격) AS 평균가격
+FROM products
+GROUP BY 카테고리번;
+
+-- 문제 27번
+
+SELECT 제품명, 가격
+FROM products
+WHERE EXISTS (
+    SELECT 카테고리번
+    FROM categories
+    WHERE products.카테고리번 = categories.카테고리번
+    AND 카테고리명 = 'Furniture'
+);
+-- 피드백 : EXISTS의 함수의 경우 서브쿼리 부분에 두개의 테이블의 같을때의 조건을 넣어야함
+
+-- 문제 28
+
+SELECT 제품명, 가격
+FROM products
+WHERE EXISTS (
+    SELECT 카테고리번
+    FROM categories
+    WHERE products.카테고리번 = categories.카테고리번
+    AND 카테고리명 = 'Electronics'
+)
+AND 가격 >= 500
+;
+
+
+-- 문제 29번
+
+SELECT 제품명, 가격
+FROM products
+WHERE 카테고리번 IN(
+    SELECT 카테고리번
+    FROM categories
+    WHERE 카테고리명 = 'Furniture'
+)
+ORDER BY 가격 DESC ;
+
+-- 문제 30번 
+
+SELECT 제품명, 가격
+FROM (
+    SELECT 제품명, 가격
+    FROM products
+    JOIN categories
+    ON products.카테고리번 = categories.카테고리번 
+    WHERE 카테고리명 = 'Stationery'
+    
+) AS A
+ORDER BY 가격 DESC
+LIMIT 1
+;
+
+-- 비슷한 문제 조금 더 풀기
+-- 문제 30-1번
+SELECT 제품명, 가격
+FROM (
+    SELECT 제품명, 가격
+    FROM products
+    JOIN categories
+    ON products.카테고리번 = categories.카테고리번
+    WHERE 카테고리명 = 'Electronics'
+) AS A
+ORDER BY 가격 ASC
+LIMIT 1;
+
+-- 문제 30-2번
+
+SELECT 제품명, 가격
+FROM (
+    SELECT 제품명, 가격
+    FROM products
+    JOIN categories
+    ON products.카테고리번 = categories.카테고리번
+    WHERE 카테고리명 = 'Furniture'
+) AS A
+ORDER BY 가격 DESC
+LIMIT 1;
+
+-- 문제 31번
+
+SELECT 카테고리번, COUNT(카테고리번) AS 제품수
+FROM products
+GROUP BY 카테고리번 
+HAVING COUNT(카테고리번) >= 2
+;
+
+-- 문제 32번
+SELECT 카테고리번, MAX(가격)
+FROM products
+GROUP BY 카테고리번
+ORDER BY MAX(가격) DESC;
